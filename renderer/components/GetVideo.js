@@ -12,13 +12,12 @@ function GetVideo() {
    
 
     const fetchVideos = async () => {
-      const response = await fetch("http://localhost:3000/videos/getVideos", {
+      const response = await fetch("http://localhost:3000/videos/getVideos/6388feb15c461aff6ecd4b24", {
         method: 'GET',
         headers: {
           'auth-token': localStorage.getItem('token')
         }
       })
-      console.log(response.status);
       if (response.status != 200) {
         console.log("in if")
         console.log('redirecting to detection');

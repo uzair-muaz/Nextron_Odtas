@@ -14,9 +14,15 @@ if (isProd) {
   await app.whenReady();
 
   const mainWindow = createWindow('main', {
-    width: 1000,
-    height: 600,
+    width: 1050,
+    height: 1000,
+    autoHideMenuBar: true,
+    title: "ODTAS"
+    // resize
   });
+
+  mainWindow.maximize();
+
 
   if (isProd) {
     await mainWindow.loadURL('app://./home.html');

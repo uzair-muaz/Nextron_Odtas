@@ -3,10 +3,13 @@ import Map from '../components/Map';
 import Toggle from '../components/Toggle';
 import LiveStream from '../components/LiveStream';
 import { BiVideoRecording } from 'react-icons/bi';
-import { RiScreenshot2Fill } from 'react-icons/ri';
-import { useState, useEffect } from "react"
+import { RiFilterLine } from 'react-icons/ri';
+
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from 'next/router'
 import FileUpload from '../components/FileUpload';
+var stopInterval = undefined;
+
 
 
 function Detection() {
@@ -14,27 +17,24 @@ function Detection() {
     const [camera, setCamera] = useState(false);
     const [tracking, setTracking] = useState(false);
     const [recording, setRecording] = useState(false);
+    const [alarm, setAlarm] = useState(false);
+    const [selectedAlarm, setSelectedAlarm] = useState("Person");
+    const [trackingIDs, setTrackingIDs] = useState([]);
+
+
+    const [width, setWidth] = useState();
+    const [height, setHeight] = useState();
+    const [clickX, setClickX] = useState();
+    const [clickY, setClickY] = useState();
+
+
 
     //to disable the buttons
     const [disabled, setDisabled] = useState(false);
-
-    //Position of mouse
-    const [globalMousePos, setGlobalMousePos] = useState({});
-    const [localMousePos, setLocalMousePos] = useState({});
-
-    const handleMouseMove = (event) => {
-        //  Get mouse position relative to element
-        const localX = event.clientX - event.target.offsetLeft;
-        const localY = event.clientY - event.target.offsetTop;
-
-        setLocalMousePos({ x: localX, y: localY });
-    };
-
+    var stateChanger = { disabled, setDisabled }
 
 
     const router = useRouter();
-
-
 
 
     useEffect(() => {
@@ -52,22 +52,7 @@ function Detection() {
             }
         };
         authorizeUser();
-
-        const handleMouseMove = (event) => {
-            setGlobalMousePos({
-                x: event.clientX,
-                y: event.clientY,
-            });
-        };
-
-        window.addEventListener('mousemove', handleMouseMove);
-
-        return () => {
-            window.removeEventListener('mousemove',handleMouseMove);
-        }
-
     }, [])
-
 
     const formData = { camera, detection, tracking, recording };
 
@@ -79,10 +64,124 @@ function Detection() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data)
         })
+
     }
 
-    console.log('Global = '+globalMousePos.x + " "+globalMousePos.y )
-    console.log('Local = '+localMousePos.x + " "+localMousePos.y)
+
+
+
+    const CheckBoxFunction = (e) => {
+        if (typeof window !== 'undefined') {
+            let all = window.document.getElementById("all-checkbox");
+            let person = window.document.getElementById("person-checkbox");
+            let htv = window.document.getElementById("htv-checkbox");
+            let ltv = window.document.getElementById("ltv-checkbox");
+            let bike = window.document.getElementById("bike-checkbox");
+            if (person.checked || htv.checked || ltv.checked || bike.checked) {
+                all.checked = false;
+            }
+            if (!person.checked && !htv.checked && !ltv.checked && !bike.checked) {
+                all.checked = true;
+            }
+        }
+    }
+
+    const FilterApi = (e) => {
+        if (typeof window !== 'undefined') {
+            let all = window.document.getElementById("all-checkbox");
+            let person = window.document.getElementById("person-checkbox");
+            let htv = window.document.getElementById("htv-checkbox");
+            let ltv = window.document.getElementById("ltv-checkbox");
+            let bike = window.document.getElementById("bike-checkbox");
+            var class_filterion_list = [];
+            if (!person.checked && !htv.checked && !ltv.checked && !bike.checked ) class_filterion_list=[]
+            if (person.checked) class_filterion_list.push(0)
+            if (ltv.checked) class_filterion_list.push(1)
+            if (htv.checked) class_filterion_list.push(2)
+            if (bike.checked) class_filterion_list.push(3)
+
+            let filteredArray = { "class_filteration_list": class_filterion_list }
+            fetch("http://localhost:8000/video/filterdetection", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(filteredArray)
+            })
+        }
+    }
+
+
+    const trackingPoints = (e) => {
+        e.preventDefault();
+        var globalX = (e.pageX)
+        var globalY = (e.pageY)
+        if (typeof window !== 'undefined') {
+            var offsets = document.getElementById('Stream').getBoundingClientRect();
+            var top = offsets.top;
+            var left = offsets.left;
+            var divWidth = offsets.width
+            var divHeight = offsets.height
+
+            var positionX = globalX - left
+            var positionY = globalY - top
+
+            setClickX(positionX)
+            setClickY(positionY)
+            setHeight(divHeight)
+            setWidth(divWidth)
+
+        }
+
+
+
+
+
+    }
+
+    // FOR SINGLE TRACKER (Ahmad Bhai look this for ref of object sent)
+    const singleTrackerAPI = (e) => {
+        e.preventDefault();
+        const data = { width, height, clickX, clickY };
+        fetch("http://localhost:8000/video/requests", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        })
+    }
+
+    const setAlarmAPI = (e) => {
+        e.preventDefault();
+        let selectedClass;
+        if(selectedAlarm == "Person") selectedClass = 0
+        if(selectedAlarm == "HTV") selectedClass = 1
+        if(selectedAlarm == "Bike") selectedClass = 2
+        if(selectedAlarm == "LTV") selectedClass = 3 
+        let formData = { "alarm_class_number": selectedClass , "is_alarm": !alarm }
+        fetch("http://localhost:8000/video/setalarm", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formData)
+        })
+    }
+
+    const getTrackingID = async (e) => {
+        stopInterval = setInterval(async () => {
+            const response = await fetch("http://localhost:8000/video/trackingids", {
+                method: 'Get',
+            })
+            if (response.status == 200) {
+                var data = await response.json()
+                setTrackingIDs(data);
+            }
+        }, 3000);
+
+    }
+
+    const delInterval = (e) => {
+        console.log("stopInterval - " + stopInterval)
+        clearInterval(stopInterval)
+        stopInterval = undefined
+
+    }
 
 
     return (
@@ -116,7 +215,19 @@ function Detection() {
                     {/* containter containing text and toggle for Tracking  */}
                     <div className='flex h-[5%] items-center mt-[5%] ' >
                         <div className='ml-[10%] text-base w-[50%]'> Tracking </div>
-                        <div onClick={() => { if (disabled == false) { setTracking(!tracking) } }} className='h-[70%] w-[15%]  ml-[15%]'> <Toggle toggleState={tracking} /> </div>
+                        <div onClick={(e) => {
+                            setTracking(!tracking);
+                            console.log("in div checking---" + stopInterval)
+                            if (stopInterval == undefined) {
+                                console.log('in if')
+                                getTrackingID(e)
+                            }
+                            else {
+                                console.log('in else')
+                                delInterval(e)
+                            }
+
+                        }} className='h-[70%] w-[15%]  ml-[15%]'> <Toggle toggleState={tracking} /> </div>
                     </div>
 
                     {/* Filterteration options */}
@@ -125,31 +236,36 @@ function Detection() {
                     {/* containter containing text and toggle for Detection  */}
                     <div className='flex h-[5%] items-center mt-[5%]' >
                         <div className='ml-[10%] text-sm w-[50%]'> All </div>
-                        <input id="default-checkbox" type="checkbox" value="" className=" accent-sky-300 h-[60%] w-[15%]  ml-[15%]" />
+                        <input id="all-checkbox" type="checkbox" value="All" className=" accent-sky-300 h-[60%] w-[15%]  ml-[15%]" defaultChecked />
                     </div>
 
                     {/* containter containing text and toggle for Detection  */}
                     <div className='flex h-[5%] items-center mt-[5%]' >
                         <div className='ml-[10%] text-sm w-[50%]'> HTV </div>
-                        <input id="default-checkbox" type="checkbox" value="" className=" accent-sky-300 h-[60%] w-[15%]  ml-[15%]" />
+                        <input id="htv-checkbox" type="checkbox" value="" className=" accent-sky-300 h-[60%] w-[15%]  ml-[15%]" onChange={(e) => CheckBoxFunction(e)} />
                     </div>
 
                     {/* containter containing text and toggle for Detection  */}
                     <div className='flex h-[5%] items-center mt-[5%]' >
                         <div className='ml-[10%] text-sm w-[50%]'> LTV </div>
-                        <input id="default-checkbox" type="checkbox" value="" className=" accent-sky-300 h-[60%] w-[15%]  ml-[15%]" />
+                        <input id="ltv-checkbox" type="checkbox" value="" className=" accent-sky-300 h-[60%] w-[15%]  ml-[15%]" onChange={(e) => CheckBoxFunction(e)} />
                     </div>
 
                     {/* containter containing text and toggle for Detection  */}
                     <div className='flex h-[5%] items-center mt-[5%]' >
-                        <div className='ml-[10%] text-sm w-[50%]'> Pedestrian </div>
-                        <input id="default-checkbox" type="checkbox" value="" className=" accent-sky-300 h-[60%] w-[15%]  ml-[15%]" />
+                        <div className='ml-[10%] text-sm w-[50%]'> Person </div>
+                        <input id="person-checkbox" type="checkbox" value="" className=" accent-sky-300 h-[60%] w-[15%]  ml-[15%]" onChange={(e) => CheckBoxFunction(e)} />
                     </div>
 
                     {/* containter containing text and toggle for Detection  */}
                     <div className='flex h-[5%] items-center mt-[5%]' >
                         <div className='ml-[10%] text-sm w-[50%]'> Motor / Bikes </div>
-                        <input id="default-checkbox" type="checkbox" value="" className=" accent-sky-300 h-[60%] w-[15%]  ml-[15%]" />
+                        <input id="bike-checkbox" type="checkbox" value="" className=" accent-sky-300 h-[60%] w-[15%]  ml-[15%]" onChange={(e) => CheckBoxFunction(e)} />
+                    </div>
+
+                    <div onClick={(e) => FilterApi(e)} className='bg-sky-200 hover:bg-sky-300 flex items-center p-2 pr-4 rounded-full border hover:border-black mx-[5%] mt-[5%] justify-center' >
+                        <RiFilterLine className=' mr-2 ml-1' />
+                        <label className='text-sm '> Filter By Class </label>
                     </div>
 
                 </div>
@@ -158,20 +274,35 @@ function Detection() {
                 <div className='w-[60%]  border-y-gray-600 border-x-slate-50 border-2 '>
                     {/* Record And Screen Capture Options */}
                     <div className="h-[9.9%] flex  justify-center items-center">
-                        <div className='bg-sky-200 hover:bg-sky-300 flex items-center p-2 pr-4 rounded-full border hover:border-black' >
+
+                        <div className='bg-sky-200 hover:bg-sky-300 flex items-center p-2 pr-4 rounded-full border hover:border-black'
+                            onClick={() => { if (disabled == false) { setRecording(!recording) } }}
+                        >
                             <BiVideoRecording className=' mr-2 ml-1' />
                             <label className='text-sm '> Start / Stop Recording </label>
                         </div>
-                        <div className='bg-sky-200 hover:bg-sky-300 flex items-center p-2 pr-4 rounded-full ml-[20%] border hover:border-black'>
-                            <RiScreenshot2Fill className=' mr-2 ml-1' />
-                            <label className='text-sm '> Capture Screen </label>
+
+                        <div className='ml-[20%] flex w-1/4 h-[40%]'>
+                            <div className='h-full'> Set Alarm</div>
+                            <div onClick={(e) => { if (disabled == false) { setAlarm(!alarm); setAlarmAPI(e) } }} className='h-[80%] w-[20%] mr-2 ml-3'> <Toggle toggleState={alarm} /> </div>
+                            <div className='h-full ml-3'>
+                                <select className='bg-slate-200' onChange={(e) => { setSelectedAlarm(e.target.value) }} >
+                                    <option value="HTV">HTV</option>
+                                    <option value="Person">Person</option>
+                                    <option value="LTV">LTV</option>
+                                    <option value="Bike">Bike</option>
+                                </select>
+                            </div>
                         </div>
+
+
+
                     </div>
                     {/* LiveStream Container */}
                     {
                         (camera)
-                            ? <div className="h-[90%] bg-slate-300 border-y-2 border-gray-600 " onMouseMove={handleMouseMove}><LiveStream formData={formData} /></div>
-                            : <div className="h-[90%] bg-slate-300 border-t-2  border-gray-600 text-center text-2xl" onMouseMove={handleMouseMove}><FileUpload /></div>
+                            ? <div onMouseMove={(e) => trackingPoints(e)} id='Stream' className="h-[90%] bg-slate-200 border-y-2 border-gray-600 " ><LiveStream formData={formData} /></div>
+                            : <div onMouseMove={(e) => trackingPoints(e)} id='Stream' className="h-[90%] bg-slate-200 border-t-2  border-gray-600 text-center text-2xl" ><FileUpload stateChanger={stateChanger} /></div>
                     }
 
                 </div>
@@ -179,37 +310,19 @@ function Detection() {
                 {/* Container 3 divided into 2 blocks one for maps and one for Tracking ID's */}
                 <div className='w-[20%] bg-white border-gray-600  border-2'>
                     <div className="h-[55%]  mb-[1%] bg-slate-50 text-center p-[5%] overflow-auto ">
-                        <h1 className='text-2xl mb-[2%] '>Tracking ID's</h1>
-                        <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]' >Tracking id 1</h2>
-                        <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]'>Tracking id 1</h2>
-                        <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]'>Tracking id 1</h2>
-                        <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]'>Tracking id 1</h2>
-                        <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]'>Tracking id 1</h2>
-                        <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]' >Tracking id 1</h2>
-                        <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]'>Tracking id 1</h2>
-                        <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]'>Tracking id 1</h2>
-                        <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]'>Tracking id 1</h2>
-                        <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]'>Tracking id 1</h2>
-                        <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]' >Tracking id 1</h2>
-                        <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]'>Tracking id 1</h2>
-                        <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]'>Tracking id 1</h2>
-                        <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]'>Tracking id 1</h2>
-                        <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]'>Tracking id 1</h2>
-                        <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]' >Tracking id 1</h2>
-                        <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]'>Tracking id 1</h2>
-                        <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]'>Tracking id 1</h2>
-                        <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]'>Tracking id 1</h2>
-                        <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]'>Tracking id 1</h2>
-                        <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]' >Tracking id 1</h2>
-                        <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]'>Tracking id 1</h2>
-                        <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]'>Tracking id 1</h2>
-                        <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]'>Tracking id 1</h2>
-                        <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]'>Tracking id 1</h2>
-                        <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]' >Tracking id 1</h2>
-                        <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]'>Tracking id 1</h2>
-                        <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]'>Tracking id 1</h2>
-                        <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]'>Tracking id 1</h2>
-                        <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]'>Tracking id 1</h2>
+                        <h1 className='text-2xl mb-[2%] border-b-2 border-slate-500 pb-2'>Tracking ID's</h1>
+                        {
+                            (tracking)
+                                ? <div className="mt-2" >
+                                    <div>
+                                        {trackingIDs.map((ids) => (
+                                            <h2 className='border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]' >Tracking id { ids }</h2>
+                                        ))}
+                                    </div>
+                                </div>
+                                : <div className=""> <div></div></div>
+                        }
+
 
                     </div>
                     <div className="h-[44%] "> <Map /> </div>

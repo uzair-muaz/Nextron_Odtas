@@ -1,0 +1,1 @@
+npm install axios classnames electron-serve electron-store google-map-react react-alert react-icons react-player react-router-dom

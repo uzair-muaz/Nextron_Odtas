@@ -3,7 +3,8 @@ import ReactPlayer from 'react-player/lazy'
 
 
 function Videos(props) {
-
+    var time = props.createdAt 
+    time = time.slice(0, 10);
     
     return (
         // Outer div controlling the card 
@@ -24,7 +25,7 @@ function Videos(props) {
             <div className=' mt-[3%] mb-[3%]'>
                 <ul className='flex justify-between'>
                     <li className="text-sm text-slate-800 font-bold">Title : {props.name} </li>
-                    <li className="text-sm text-slate-800 font-bold ">Date : {props.createdAt}</li>
+                    <li className="text-sm text-slate-800 font-bold ">Date : {time}</li>
                 </ul>
             </div>
 

@@ -6,7 +6,7 @@ import { useState, useEffect } from "react"
 function Navbar() {
 
     
-    const [user, setUser] = useState("https://res.cloudinary.com/dofxfcziq/image/upload/v1664718943/cld-sample.jpg");
+    const [user, setUser] = useState("/images/user.png");
 
     useEffect(() => {
 
