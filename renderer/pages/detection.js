@@ -19,10 +19,15 @@ function Detection() {
   const [selectedAlarm, setSelectedAlarm] = useState('Person');
   const [trackingIDs, setTrackingIDs] = useState([]);
 
-  const [width, setWidth] = useState();
-  const [height, setHeight] = useState();
-  const [clickX, setClickX] = useState();
-  const [clickY, setClickY] = useState();
+  //   const [width, setWidth] = useState();
+  //   const [height, setHeight] = useState();
+  //   const [clickX, setClickX] = useState();
+  //   const [clickY, setClickY] = useState();
+
+  var width = 0;
+  var height = 0;
+  var clickX = 0;
+  var clickY = 0;
 
   //to disable the buttons
   const [disabled, setDisabled] = useState(false);
@@ -101,6 +106,9 @@ function Detection() {
 
   const trackingPoints = (e) => {
     e.preventDefault();
+
+    console.log(clickX, clickY, height, width);
+    
     var globalX = e.pageX;
     var globalY = e.pageY;
     if (typeof window !== 'undefined') {
@@ -110,15 +118,15 @@ function Detection() {
       var divWidth = offsets.width;
       var divHeight = offsets.height;
 
-      var positionX = globalX - left;
-      var positionY = globalY - top;
+      clickX = positionX;
+      clickY = positionY;
+      height = divHeight;
+      width = divWidth;
 
-      setClickX(parseInt(positionX));
-      setClickY(parseInt(positionY));
-      setHeight(parseInt(divHeight));
-      setWidth(parseInt(divWidth));
-
-      console.log(positionX, positionY, divHeight, divWidth);
+      //   setClickX(parseInt(positionX));
+      //   setClickY(parseInt(positionY));
+      //   setHeight(parseInt(divHeight));
+      //   setWidth(parseInt(divWidth));
     }
   };
 
@@ -366,7 +374,6 @@ function Detection() {
             </div>
           ) : (
             <div
-              id="Stream"
               className="h-[90%] bg-slate-200 border-t-2  border-gray-600 text-center text-2xl"
             >
               <FileUpload stateChanger={stateChanger} />
