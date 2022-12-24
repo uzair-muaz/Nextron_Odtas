@@ -8,6 +8,7 @@ import { RiFilterLine } from 'react-icons/ri';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import FileUpload from '../components/FileUpload';
+import Navbar from '../components/Navbar';
 var stopInterval = undefined;
 
 function Detection() {
@@ -108,7 +109,7 @@ function Detection() {
     e.preventDefault();
 
     console.log(clickX, clickY, height, width);
-    
+
     var globalX = e.pageX;
     var globalY = e.pageY;
     if (typeof window !== 'undefined') {
@@ -117,6 +118,9 @@ function Detection() {
       var left = offsets.left;
       var divWidth = offsets.width;
       var divHeight = offsets.height;
+
+      var positionX = globalX - left;
+      var positionY = globalY - top;
 
       clickX = positionX;
       clickY = positionY;
@@ -175,238 +179,238 @@ function Detection() {
   };
 
   return (
-    // Most outer container that holds the nav bar and the containter for dashboard
-    <div className="bg-slate-50 h-full ">
-      {/* Navbar  */}
-      {/* <div className='h-[10%]'><Navbar /></div> */}
-
-      {/* Containter for Dashboard Elements */}
-      <div className=" h-[100%] flex">
-        {/* Container 1 for Toggle Buttons and Detection Filteration options */}
-        <div className="w-[20%] h-full border-gray-600  border-2">
-          {/* Video Options  */}
-          <h1 className=" mt-[5%] mb-[10%] text-xl text-center ">
-            Video Options
-          </h1>
-          {/* containter containing text and toggle for livestream  */}
-          <div className="flex h-[5%] items-center mt-[5%] ">
-            <div className="ml-[10%] text-base w-[50%]"> LiveStream </div>
-            <div
-              onClick={() => {
-                if (disabled == false) {
-                  setCamera(!camera);
-                }
-              }}
-              className="h-[70%] w-[15%]  ml-[15%]"
-            >
-              {' '}
-              <Toggle toggleState={camera} />{' '}
-            </div>
-          </div>
-
-          {/* containter containing text and toggle for Detection  */}
-          <div className="flex h-[5%] items-center mt-[5%] ">
-            <div className="ml-[10%] text-base w-[50%]"> Detection </div>
-            <div
-              onClick={() => {
-                if (disabled == false) {
-                  setDetection(!detection);
-                }
-              }}
-              className="h-[70%] w-[15%]  ml-[15%]"
-            >
-              {' '}
-              <Toggle toggleState={detection} />{' '}
-            </div>
-          </div>
-          {/* containter containing text and toggle for Tracking  */}
-          <div className="flex h-[5%] items-center mt-[5%] ">
-            <div className="ml-[10%] text-base w-[50%]"> Tracking </div>
-            <div
-              onClick={(e) => {
-                setTracking(!tracking);
-                console.log('in div checking---' + stopInterval);
-                if (stopInterval == undefined) {
-                  console.log('in if');
-                  getTrackingID(e);
-                } else {
-                  console.log('in else');
-                  delInterval(e);
-                }
-              }}
-              className="h-[70%] w-[15%]  ml-[15%]"
-            >
-              {' '}
-              <Toggle toggleState={tracking} />{' '}
-            </div>
-          </div>
-
-          {/* Filterteration options */}
-          <h1 className=" mt-[25%] mb-[10%] text-xl text-center ">
-            Filteration Options
-          </h1>
-
-          {/* containter containing text and toggle for Detection  */}
-          <div className="flex h-[5%] items-center mt-[5%]">
-            <div className="ml-[10%] text-sm w-[50%]"> All </div>
-            <input
-              id="all-checkbox"
-              type="checkbox"
-              value="All"
-              className=" accent-sky-300 h-[60%] w-[15%]  ml-[15%]"
-              defaultChecked
-            />
-          </div>
-
-          {/* containter containing text and toggle for Detection  */}
-          <div className="flex h-[5%] items-center mt-[5%]">
-            <div className="ml-[10%] text-sm w-[50%]"> HTV </div>
-            <input
-              id="htv-checkbox"
-              type="checkbox"
-              value=""
-              className=" accent-sky-300 h-[60%] w-[15%]  ml-[15%]"
-              onChange={(e) => CheckBoxFunction(e)}
-            />
-          </div>
-
-          {/* containter containing text and toggle for Detection  */}
-          <div className="flex h-[5%] items-center mt-[5%]">
-            <div className="ml-[10%] text-sm w-[50%]"> LTV </div>
-            <input
-              id="ltv-checkbox"
-              type="checkbox"
-              value=""
-              className=" accent-sky-300 h-[60%] w-[15%]  ml-[15%]"
-              onChange={(e) => CheckBoxFunction(e)}
-            />
-          </div>
-
-          {/* containter containing text and toggle for Detection  */}
-          <div className="flex h-[5%] items-center mt-[5%]">
-            <div className="ml-[10%] text-sm w-[50%]"> Person </div>
-            <input
-              id="person-checkbox"
-              type="checkbox"
-              value=""
-              className=" accent-sky-300 h-[60%] w-[15%]  ml-[15%]"
-              onChange={(e) => CheckBoxFunction(e)}
-            />
-          </div>
-
-          {/* containter containing text and toggle for Detection  */}
-          <div className="flex h-[5%] items-center mt-[5%]">
-            <div className="ml-[10%] text-sm w-[50%]"> Motor / Bikes </div>
-            <input
-              id="bike-checkbox"
-              type="checkbox"
-              value=""
-              className=" accent-sky-300 h-[60%] w-[15%]  ml-[15%]"
-              onChange={(e) => CheckBoxFunction(e)}
-            />
-          </div>
-
-          <div
-            onClick={(e) => FilterApi(e)}
-            className="bg-sky-200 hover:bg-sky-300 flex items-center p-2 pr-4 rounded-full border hover:border-black mx-[5%] mt-[5%] justify-center"
-          >
-            <RiFilterLine className=" mr-2 ml-1" />
-            <label className="text-sm "> Filter By Class </label>
-          </div>
-        </div>
-
-        {/* Containter 2 divided into 2 blocks one for live stream and one for record options */}
-        <div className="w-[60%]  border-y-gray-600 border-x-slate-50 border-2 ">
-          {/* Record And Screen Capture Options */}
-          <div className="h-[9.9%] flex  justify-center items-center">
-            <div
-              className="bg-sky-200 hover:bg-sky-300 flex items-center p-2 pr-4 rounded-full border hover:border-black"
-              onClick={() => {
-                if (disabled == false) {
-                  setRecording(!recording);
-                }
-              }}
-            >
-              <BiVideoRecording className=" mr-2 ml-1" />
-              <label className="text-sm "> Start / Stop Recording </label>
-            </div>
-
-            <div className="ml-[20%] flex w-1/4 h-[40%]">
-              <div className="h-full"> Set Alarm</div>
-              <div
-                onClick={(e) => {
-                  if (disabled == false) {
-                    setAlarm(!alarm);
-                    setAlarmAPI(e);
-                  }
-                }}
-                className="h-[80%] w-[20%] mr-2 ml-3"
-              >
-                {' '}
-                <Toggle toggleState={alarm} />{' '}
-              </div>
-              <div className="h-full ml-3">
-                <select
-                  className="bg-slate-200"
-                  onChange={(e) => {
-                    setSelectedAlarm(e.target.value);
+    <div className="h-full">
+      <div className="h-[9%]">
+        <Navbar />
+      </div>
+      <div className="bg-slate-200 h-[91%] ">
+        {/* // Most outer container that holds the nav bar and the containter for dashboard */}
+        <div className="bg-slate-50 h-full ">
+          {/* Containter for Dashboard Elements */}
+          <div className=" h-[100%] flex">
+            {/* Container 1 for Toggle Buttons and Detection Filteration options */}
+            <div className="w-[20%] h-full border-gray-600  border-2">
+              {/* Video Options  */}
+              <h1 className=" mt-[5%] mb-[10%] text-xl text-center ">
+                Video Options
+              </h1>
+              {/* containter containing text and toggle for livestream  */}
+              <div className="flex h-[5%] items-center mt-[5%] ">
+                <div className="ml-[10%] text-base w-[50%]"> LiveStream </div>
+                <div
+                  onClick={() => {
+                    if (disabled == false) {
+                      setCamera(!camera);
+                    }
                   }}
+                  className="h-[70%] w-[15%]  ml-[15%]"
                 >
-                  <option value="HTV">HTV</option>
-                  <option value="Person">Person</option>
-                  <option value="LTV">LTV</option>
-                  <option value="Bike">Bike</option>
-                </select>
-              </div>
-            </div>
-          </div>
-          {/* LiveStream Container */}
-          {camera ? (
-            <div
-              onClick={(e) => {
-                singleTrackerAPI(e);
-              }}
-              onMouseMove={(e) => trackingPoints(e)}
-              id="Stream"
-              className="h-[90%] bg-slate-200 border-y-2 border-gray-600 "
-            >
-              <LiveStream formData={formData} />
-            </div>
-          ) : (
-            <div
-              className="h-[90%] bg-slate-200 border-t-2  border-gray-600 text-center text-2xl"
-            >
-              <FileUpload stateChanger={stateChanger} />
-            </div>
-          )}
-        </div>
-
-        {/* Container 3 divided into 2 blocks one for maps and one for Tracking ID's */}
-        <div className="w-[20%] bg-white border-gray-600  border-2">
-          <div className="h-[55%]  mb-[1%] bg-slate-50 text-center p-[5%] overflow-auto ">
-            <h1 className="text-2xl mb-[2%] border-b-2 border-slate-500 pb-2">
-              Tracking ID's
-            </h1>
-            {tracking ? (
-              <div className="mt-2">
-                <div>
-                  {trackingIDs.map((ids) => (
-                    <h2 className="border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]">
-                      Tracking id {ids}
-                    </h2>
-                  ))}
+                  {' '}
+                  <Toggle toggleState={camera} />{' '}
                 </div>
               </div>
-            ) : (
-              <div className="">
-                {' '}
-                <div></div>
+
+              {/* containter containing text and toggle for Detection  */}
+              <div className="flex h-[5%] items-center mt-[5%] ">
+                <div className="ml-[10%] text-base w-[50%]"> Detection </div>
+                <div
+                  onClick={() => {
+                    if (disabled == false) {
+                      setDetection(!detection);
+                    }
+                  }}
+                  className="h-[70%] w-[15%]  ml-[15%]"
+                >
+                  {' '}
+                  <Toggle toggleState={detection} />{' '}
+                </div>
               </div>
-            )}
-          </div>
-          <div className="h-[44%] ">
-            {' '}
-            <Map />{' '}
+              {/* containter containing text and toggle for Tracking  */}
+              <div className="flex h-[5%] items-center mt-[5%] ">
+                <div className="ml-[10%] text-base w-[50%]"> Tracking </div>
+                <div
+                  onClick={(e) => {
+                    setTracking(!tracking);
+                    console.log('in div checking---' + stopInterval);
+                    if (stopInterval == undefined) {
+                      console.log('in if');
+                      getTrackingID(e);
+                    } else {
+                      console.log('in else');
+                      delInterval(e);
+                    }
+                  }}
+                  className="h-[70%] w-[15%]  ml-[15%]"
+                >
+                  {' '}
+                  <Toggle toggleState={tracking} />{' '}
+                </div>
+              </div>
+
+              {/* Filterteration options */}
+              <h1 className=" mt-[25%] mb-[10%] text-xl text-center ">
+                Filteration Options
+              </h1>
+
+              {/* containter containing text and toggle for Detection  */}
+              <div className="flex h-[5%] items-center mt-[5%]">
+                <div className="ml-[10%] text-sm w-[50%]"> All </div>
+                <input
+                  id="all-checkbox"
+                  type="checkbox"
+                  value="All"
+                  className=" accent-sky-300 h-[60%] w-[15%]  ml-[15%]"
+                  defaultChecked
+                />
+              </div>
+
+              {/* containter containing text and toggle for Detection  */}
+              <div className="flex h-[5%] items-center mt-[5%]">
+                <div className="ml-[10%] text-sm w-[50%]"> HTV </div>
+                <input
+                  id="htv-checkbox"
+                  type="checkbox"
+                  value=""
+                  className=" accent-sky-300 h-[60%] w-[15%]  ml-[15%]"
+                  onChange={(e) => CheckBoxFunction(e)}
+                />
+              </div>
+
+              {/* containter containing text and toggle for Detection  */}
+              <div className="flex h-[5%] items-center mt-[5%]">
+                <div className="ml-[10%] text-sm w-[50%]"> LTV </div>
+                <input
+                  id="ltv-checkbox"
+                  type="checkbox"
+                  value=""
+                  className=" accent-sky-300 h-[60%] w-[15%]  ml-[15%]"
+                  onChange={(e) => CheckBoxFunction(e)}
+                />
+              </div>
+
+              {/* containter containing text and toggle for Detection  */}
+              <div className="flex h-[5%] items-center mt-[5%]">
+                <div className="ml-[10%] text-sm w-[50%]"> Person </div>
+                <input
+                  id="person-checkbox"
+                  type="checkbox"
+                  value=""
+                  className=" accent-sky-300 h-[60%] w-[15%]  ml-[15%]"
+                  onChange={(e) => CheckBoxFunction(e)}
+                />
+              </div>
+
+              {/* containter containing text and toggle for Detection  */}
+              <div className="flex h-[5%] items-center mt-[5%]">
+                <div className="ml-[10%] text-sm w-[50%]"> Motor / Bikes </div>
+                <input
+                  id="bike-checkbox"
+                  type="checkbox"
+                  value=""
+                  className=" accent-sky-300 h-[60%] w-[15%]  ml-[15%]"
+                  onChange={(e) => CheckBoxFunction(e)}
+                />
+              </div>
+
+              <div
+                onClick={(e) => FilterApi(e)}
+                className="bg-sky-200 hover:bg-sky-300 flex items-center p-2 pr-4 rounded-full border hover:border-black mx-[5%] mt-[5%] justify-center"
+              >
+                <RiFilterLine className=" mr-2 ml-1" />
+                <label className="text-sm "> Filter By Class </label>
+              </div>
+            </div>
+
+            {/* Containter 2 divided into 2 blocks one for live stream and one for record options */}
+            <div className="w-[60%]  border-y-gray-600 border-x-slate-50 border-2 ">
+              {/* Record And Screen Capture Options */}
+              <div className="h-[9.9%] flex  justify-center items-center">
+                <div
+                  className="bg-sky-200 hover:bg-sky-300 flex items-center p-2 pr-4 rounded-full border hover:border-black"
+                  onClick={() => {
+                    if (disabled == false) {
+                      setRecording(!recording);
+                    }
+                  }}
+                >
+                  <BiVideoRecording className=" mr-2 ml-1" />
+                  <label className="text-sm "> Start / Stop Recording </label>
+                </div>
+
+                <div className="ml-[20%] flex w-1/4 h-[40%]">
+                  <div className="h-full"> Set Alarm</div>
+                  <div
+                    onClick={(e) => {
+                      if (disabled == false) {
+                        setAlarm(!alarm);
+                        setAlarmAPI(e);
+                      }
+                    }}
+                    className="h-[80%] w-[20%] mr-2 ml-3"
+                  >
+                    {' '}
+                    <Toggle toggleState={alarm} />{' '}
+                  </div>
+                  <div className="h-full ml-3">
+                    <select
+                      className="bg-slate-200"
+                      onChange={(e) => {
+                        setSelectedAlarm(e.target.value);
+                      }}
+                    >
+                      <option value="HTV">HTV</option>
+                      <option value="Person">Person</option>
+                      <option value="LTV">LTV</option>
+                      <option value="Bike">Bike</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              {/* LiveStream Container */}
+              {camera ? (
+                <div
+                  onClick={(e) => {
+                    singleTrackerAPI(e);
+                  }}
+                  onMouseMove={(e) => trackingPoints(e)}
+                  id="Stream"
+                  className="h-[90%] bg-slate-200 border-y-2 border-gray-600 "
+                >
+                  <LiveStream formData={formData} />
+                </div>
+              ) : (
+                <div className="h-[90%] bg-slate-200 border-t-2  border-gray-600 text-center text-2xl">
+                  <FileUpload stateChanger={stateChanger} />
+                </div>
+              )}
+            </div>
+
+            {/* Container 3 divided into 2 blocks one for maps and one for Tracking ID's */}
+            <div className="w-[20%] bg-white border-gray-600  border-2">
+              <div className="h-[55%]  mb-[1%] bg-slate-50 text-center p-[5%] overflow-auto ">
+                <h1 className="text-2xl mb-[2%] border-b-2 border-slate-500 pb-2">
+                  Tracking ID's
+                </h1>
+                {tracking ? (
+                  <div className="mt-2">
+                    <div>
+                      {trackingIDs.map((ids) => (
+                        <h2 className="border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]">
+                          Tracking id {ids}
+                        </h2>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="">
+                    <div></div>
+                  </div>
+                )}
+              </div>
+              <div className="h-[44%] ">
+                <Map />
+              </div>
+            </div>
           </div>
         </div>
       </div>
