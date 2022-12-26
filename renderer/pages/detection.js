@@ -103,12 +103,22 @@ function Detection() {
     }
   }
 
+  const lock = () => {
+    if (camera) {
+      fetch('http://localhost:8000/cameramovement/lock', {
+        method: 'GET',
+      }
+      );
+    }
+  }
+
 
   onKeyPress(moveRight, 'd');
   onKeyPress(moveLeft, 'a');
   onKeyPress(moveUp, 'w');
   onKeyPress(moveDown, 's');
   onKeyPress(reset, 'p');
+  onKeyPress(reset, 'l');
 
   const formData = { camera, detection, tracking, recording };
 
