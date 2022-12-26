@@ -9,6 +9,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import FileUpload from '../components/FileUpload';
 import Navbar from '../components/Navbar';
+import { onKeyPress } from '../hooks/onKeyPress';
 var stopInterval = undefined;
 
 function Detection() {
@@ -46,12 +47,58 @@ function Detection() {
         },
       });
 
+      var _data = await response.json();
+
+      console.log("response = " + _data);
       if (response.status != 200) {
         router.push('/');
       }
     };
     authorizeUser();
   }, []);
+
+
+  const moveRight = () => {
+    if (detection) {
+      fetch('http://localhost:8000/cameramovement/right', {
+        method: 'GET',
+      }
+      );
+    }
+  }
+
+  const moveLeft = () => {
+    if (detection) {
+      fetch('http://localhost:8000/cameramovement/left', {
+        method: 'GET',
+      }
+      );
+    }
+  }
+
+  const moveUp = () => {
+    if (detection) {
+      fetch('http://localhost:8000/cameramovement/up', {
+        method: 'GET',
+      }
+      );
+    }
+  }
+
+  const moveDown = () => {
+    if (detection) {
+      fetch('http://localhost:8000/cameramovement/down', {
+        method: 'GET',
+      }
+      );
+    }
+  }
+
+
+  onKeyPress(moveRight, 'D');
+  onKeyPress(moveLeft, 'A');
+  onKeyPress(moveUp, 'W');
+  onKeyPress(moveDown, 'S');
 
   const formData = { camera, detection, tracking, recording };
 

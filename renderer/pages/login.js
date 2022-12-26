@@ -32,11 +32,34 @@ export default function Login() {
             // Save the auth token and redirect
             localStorage.setItem('token', json.authtoken);
             console.log(json.authtoken)
-            if(json.userType === 'admin'){
+            if (json.userType === 'admin') {
                 alert("Admin cant login as an operator  ")
                 router.push('/')
             }
-            else{
+            else {
+
+                const response = await fetch("http://localhost:3000/auth/getuser", {
+                    method: 'POST',
+                    headers: {
+                        'auth-token': localStorage.getItem('token')
+                    }
+                })
+
+                var jsonResponse = await response.json();
+                let userID = jsonResponse._id.toString();
+                let userDrone = jsonResponse.Drone_ID.toString();
+
+                console.log("===============================")
+                console.log("UserID = " + userID);
+                console.log("UserDrone = " + userDrone);
+                console.log("===============================")
+
+                let fastServer = { operator_id: userID, operator_drone_id: userDrone };
+                const userDetails = await fetch("http://localhost:8000/send_operator_info", {
+                    method: 'POST',
+                    body: JSON.stringify(fastServer),
+                })
+
                 router.push('/dashboard')
             }
         }
@@ -51,9 +74,9 @@ export default function Login() {
         //Main contain which conatins the login card and bg-color 
         <div className='flex flex-col items-center justify-center w-full flex-1 px-20 text-center bg-[rgba(138,138,140,255)] h-screen'>
 
-            
+
             <div className='bg-white md:text-base lg:text-lg  rounded-2xl shadow-2xl flex w-2/3 h-2/3 '>
-            
+
                 <div className='w-2/5 p-5'>
                     {/* Sign in message and underline */}
                     <div className='px-10'>
@@ -94,12 +117,12 @@ export default function Login() {
                         {
                             (check === "password")
                                 ? <div className='w-[100%] md:text-xs lg:text-sm items-center flex' >
-                                <BiErrorCircle className='text-red-600 md:text-sm lg:text-xs mr-2 ml-1 mt-1' />
-                                <label className='md:text-xs text-red-600 mt-1 '> Incorrect Password</label>
-                            </div>
+                                    <BiErrorCircle className='text-red-600 md:text-sm lg:text-xs mr-2 ml-1 mt-1' />
+                                    <label className='md:text-xs text-red-600 mt-1 '> Incorrect Password</label>
+                                </div>
                                 : <div></div>
                         }
-                
+
                     </div>
 
                     {/* Forgot password and Sign In button  */}
