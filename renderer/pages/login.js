@@ -55,10 +55,11 @@ export default function Login() {
                 console.log("===============================")
 
                 let fastServer = { operator_id: userID, operator_drone_id: userDrone };
-                const userDetails = await fetch("http://localhost:8000/send_operator_info", {
-                    method: 'POST',
-                    body: JSON.stringify(fastServer),
-                })
+                // const userDetails = await fetch("http://localhost:8000/send_operator_info", {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify(fastServer),
+                // })
 
                 router.push('/dashboard')
             }

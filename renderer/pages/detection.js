@@ -59,7 +59,7 @@ function Detection() {
 
 
   const moveRight = () => {
-    if (detection) {
+    if (camera) {
       fetch('http://localhost:8000/cameramovement/right', {
         method: 'GET',
       }
@@ -68,7 +68,7 @@ function Detection() {
   }
 
   const moveLeft = () => {
-    if (detection) {
+    if (camera) {
       fetch('http://localhost:8000/cameramovement/left', {
         method: 'GET',
       }
@@ -77,7 +77,7 @@ function Detection() {
   }
 
   const moveUp = () => {
-    if (detection) {
+    if (camera) {
       fetch('http://localhost:8000/cameramovement/up', {
         method: 'GET',
       }
@@ -85,8 +85,17 @@ function Detection() {
     }
   }
 
+  const reset = () => {
+    if (camera) {
+      fetch('http://localhost:8000/cameramovement/reset', {
+        method: 'GET',
+      }
+      );
+    }
+  }
+
   const moveDown = () => {
-    if (detection) {
+    if (camera) {
       fetch('http://localhost:8000/cameramovement/down', {
         method: 'GET',
       }
@@ -95,10 +104,11 @@ function Detection() {
   }
 
 
-  onKeyPress(moveRight, 'D');
-  onKeyPress(moveLeft, 'A');
-  onKeyPress(moveUp, 'W');
-  onKeyPress(moveDown, 'S');
+  onKeyPress(moveRight, 'd');
+  onKeyPress(moveLeft, 'a');
+  onKeyPress(moveUp, 'w');
+  onKeyPress(moveDown, 's');
+  onKeyPress(moveDown, 'p');
 
   const formData = { camera, detection, tracking, recording };
 
