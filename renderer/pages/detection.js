@@ -108,7 +108,7 @@ function Detection() {
   onKeyPress(moveLeft, 'a');
   onKeyPress(moveUp, 'w');
   onKeyPress(moveDown, 's');
-  onKeyPress(moveDown, 'p');
+  onKeyPress(reset, 'p');
 
   const formData = { camera, detection, tracking, recording };
 
