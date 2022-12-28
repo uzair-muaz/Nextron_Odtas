@@ -438,6 +438,8 @@ function Detection() {
                 <div
                   onClick={(e) => {
                     singleTrackerAPI(e);
+                    const data = { width, height, clickX, clickY };
+                    console.log(data)
                   }}
                   onMouseMove={(e) => trackingPoints(e)}
                   id="Stream"
@@ -462,7 +464,15 @@ function Detection() {
                   <div className="mt-2">
                     <div>
                       {trackingIDs.map((ids) => (
-                        <h2 className="border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]">
+                        <h2 onClick={() => {
+                          let singleTrackingID = { singleID: ids }
+                          console.log(singleTrackingID);
+                          fetch('http://localhost:8000/tracking/id', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(singleTrackingID),
+                          });
+                        }} className="border-slate-400 bg-gray-200 rounded-xl border-1 text-sm p-1 pl-2 font-sans  hover:bg-sky-200 cursor-pointer mb-[1.2%]">
                           Tracking id {ids}
                         </h2>
                       ))}
